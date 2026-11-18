@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SURAKSHA360</title>
+<meta name="theme-color" content="#123B5D">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: sticky navy header, live-alert band under it, 960px content column. Map is one SVG with numbered shelter markers; pop-up alerts slide in from the top. */
+:root{--navy:#123B5D;--teal:#087E8B;--or:#F28C28;--bg:#F2F7FB;--card:#fff;--ink:#14212b;--mut:#4a5d6b;--line:#d3e0ea;--hd:#123B5D;--lk:#087E8B;--danger:#d32f2f;--errtx:#c62828;--amber:#f2a200;--ok:#1d7a45;--land:#e4eedd;--road:#a7b3bb;--sea:#8cc4ea;--flood:#4aa3df}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0c1a26;--card:#13273a;--ink:#e8f0f6;--mut:#a8bccb;--line:#27425a;--hd:#0a1f31;--lk:#4fc3cf;--errtx:#ff8a8a;--ok:#5fd08a;--land:#14303a;--road:#3d5668;--sea:#1b4a70;--flood:#2f7fb8;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0c1a26;--card:#13273a;--ink:#e8f0f6;--mut:#a8bccb;--line:#27425a;--hd:#0a1f31;--lk:#4fc3cf;--errtx:#ff8a8a;--ok:#5fd08a;--land:#14303a;--road:#3d5668;--sea:#1b4a70;--flood:#2f7fb8;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--hd);z-index:10}
+a{color:var(--lk)}:focus-visible{outline:3px solid var(--or);outline-offset:2px}
+.hd{background:var(--hd);color:#fff;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.brand{color:#fff;font-weight:800;font-size:20px;text-decoration:none;letter-spacing:.02em;margin-right:auto}.brand b,h1 b{color:var(--or)}
+.hd select,.hd button{font:inherit;width:auto;padding:6px 10px;border-radius:8px;border:1px solid #ffffff66;background:transparent;color:#fff;cursor:pointer}
+.hd option{color:#000}
+nav{display:none;flex-basis:100%;flex-direction:column}nav.open{display:flex}
+nav a{color:#fff;text-decoration:none;padding:9px 10px;border-radius:8px;font-size:15px}nav a[aria-current=page]{background:var(--teal)}
+@media(min-width:1000px){nav{display:flex;flex-basis:auto;flex-direction:row;flex-wrap:wrap;order:3;flex:1 1 100%}#mb{display:none}}
+.bc,main,footer>div{max-width:960px;margin-left:auto;margin-right:auto}
+.bc{margin-top:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));font-size:14px;color:var(--mut)}
+main{padding-block:10px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1{font-size:clamp(28px,6vw,46px);line-height:1.1;margin:.2em 0;color:var(--ink);text-wrap:balance}h2{margin:1.6em 0 .5em;font-size:24px}h3{margin:0 0 6px}
+.hero{background:linear-gradient(135deg,var(--navy),var(--teal));color:#fff;border-radius:20px;padding:30px 22px;margin-top:6px}
+.hero h1{color:#fff}.eyebrow{margin:0;font-weight:700;opacity:.9}.tag{font-size:20px;font-weight:700;color:#ffd9ad;margin:4px 0 10px}.lead{max-width:40em}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0}
+.btn{display:inline-block;font:inherit;font-weight:700;padding:10px 18px;border-radius:999px;border:0;background:var(--teal);color:#fff;text-decoration:none;cursor:pointer}
+.btn.or{background:var(--or);color:#123B5D}.btn.ghost{background:transparent;color:var(--lk);border:2px solid var(--lk)}.btn.wh{background:#fff;color:#123B5D}.btn.wg{background:transparent;color:#fff;border:2px solid #fff}.btn.sm{padding:6px 14px;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;color:var(--ink);min-width:0}
+a.card{text-decoration:none}a.card:hover{border-color:var(--teal);transform:translateY(-2px)}a.card{transition:transform .2s}
+.ic{font-size:30px}.mut{color:var(--mut)}.empty{color:var(--mut);text-align:center;padding:20px}
+.demo{display:inline-block;background:var(--or);color:#123B5D;font-weight:800;font-size:12px;padding:2px 8px;border-radius:6px;letter-spacing:.03em}
+.note{border-left:6px solid var(--or);background:var(--card);padding:12px 14px;border-radius:8px;margin:14px 0}
+input,select,textarea{font:inherit;padding:10px 12px;border-radius:10px;border:2px solid var(--line);background:var(--card);color:var(--ink);width:100%}
+label{font-weight:600;display:block;margin:12px 0 4px}.row input,.row select{width:auto;flex:1 1 200px}
+.sw{display:flex;gap:8px;align-items:center;font-weight:600;margin:0}.sw input{width:20px;height:20px;flex:none;accent-color:var(--teal)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}.chip{font:inherit;padding:6px 14px;border-radius:999px;border:2px solid var(--teal);background:transparent;color:var(--lk);cursor:pointer;font-weight:600}.chip[aria-pressed=true]{background:var(--teal);color:#fff}
+details.card{margin:12px 0}summary{font-weight:800;font-size:20px;cursor:pointer}details ul{margin:4px 0 10px;padding-left:20px}details h4{margin:12px 0 2px;color:var(--lk)}
+.bar{height:16px;border-radius:8px;background:var(--line);overflow:hidden}.bar i{display:block;height:100%;background:var(--teal);transition:width .3s}
+.ck{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);margin:0;font-weight:500}.ck input{width:22px;height:22px;accent-color:var(--teal)}
+.opt{display:block;width:100%;text-align:left;margin:8px 0;padding:12px;border-radius:10px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:inherit;cursor:pointer}
+.opt[aria-pressed=true]{border-color:var(--teal)}.opt.ok{border-color:var(--ok);background:rgba(29,122,69,.15)}.opt.bad{border-color:var(--danger);background:rgba(211,47,47,.15)}
+table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}
+.ok-msg{color:var(--ok);font-weight:700}.err{color:var(--errtx);font-weight:700}
+.qr{width:130px;height:130px;border:3px dashed var(--mut);display:grid;place-items:center;text-align:center;font-size:13px;color:var(--mut);border-radius:10px}
+.big{font-size:44px;font-weight:800;margin:0;letter-spacing:.04em}
+footer{background:var(--hd);color:#dbe7f0;padding-block:22px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));font-size:14px}footer a{color:#9fe3ea}
+
+/* severity colours, used by toasts, the live band and badges */
+.sev-warning{--sevc:var(--danger);--sevi:#fff}.sev-watch{--sevc:var(--amber);--sevi:#14212b}.sev-advisory{--sevc:var(--teal);--sevi:#fff}
+.sv{display:inline-block;font-weight:800;font-size:12px;letter-spacing:.06em;padding:2px 8px;border-radius:6px;background:var(--sevc);color:var(--sevi)}
+.wi{width:44px;height:44px;display:block;color:var(--sevc)}.wi rect,.wi circle{fill:var(--sevi)}
+.toasts{position:fixed;z-index:40;left:0;right:0;top:env(safe-area-inset-top,0px);padding-top:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;align-items:center;gap:10px;pointer-events:none}
+.toast{pointer-events:auto;width:100%;max-width:540px;display:flex;gap:12px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-left:8px solid var(--sevc);border-radius:14px;padding:12px 14px;box-shadow:0 10px 30px rgba(0,0,0,.3);animation:tin .35s ease-out}
+.toast .ti{flex:0 0 44px}.toast.sev-warning .wi{animation:wp 1s ease-in-out infinite}
+.toast .tb{min-width:0;flex:1}.toast p{margin:4px 0}.toast h3{font-size:18px;margin:6px 0 2px}.tk{font-weight:700;font-size:13px}
+@keyframes tin{from{transform:translateY(-120%);opacity:0}to{transform:none;opacity:1}}
+@keyframes wp{50%{transform:scale(1.14)}}
+.ab{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--card);color:var(--ink);border-bottom:4px solid var(--sevc);padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.ab .wi{width:30px;height:30px}.ab .bt{flex:1 1 240px;min-width:0}
+.alrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.lg{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--line)}.lg time{color:var(--mut);font-variant-numeric:tabular-nums}
+
+/* map */
+#mapsvg{width:100%;height:auto;display:block;border-radius:14px;border:1px solid var(--line);touch-action:manipulation;cursor:crosshair}
+.m-land{fill:var(--land)}.m-sea{fill:var(--sea)}.m-road path{stroke:var(--road);stroke-width:10;fill:none}
+.m-flood{fill:var(--flood);fill-opacity:.45;stroke:var(--flood);stroke-width:2;stroke-dasharray:6 4}
+.m-lab{font:700 14px system-ui,sans-serif;fill:var(--ink)}
+.m-evac{fill:none;stroke:var(--or);stroke-width:3;stroke-dasharray:8 6}
+.m-route{fill:none;stroke:var(--lk);stroke-width:5;stroke-linejoin:round;stroke-linecap:round}
+.m-pulse{fill:var(--danger);fill-opacity:.2;stroke:var(--danger);stroke-width:3;stroke-dasharray:8 5;animation:pl 1.6s ease-in-out infinite;pointer-events:none}
+@keyframes pl{50%{fill-opacity:.42}}
+.m-sh{cursor:pointer}.m-sh .b{fill:var(--or);stroke:var(--navy);stroke-width:2}.m-sh text{font:800 17px system-ui,sans-serif;fill:#123B5D;text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.m-sh .ring{fill:none;stroke:var(--lk);stroke-width:4}.m-sh.dim{opacity:.3;cursor:default}
+.m-hos{fill:#fff;stroke:#d63a3a;stroke-width:3}.m-pol{fill:#3a4ed6}.m-pt{font:800 14px system-ui,sans-serif;fill:#fff;text-anchor:middle;dominant-baseline:central}
+.m-ur{fill:var(--lk);fill-opacity:.25}.m-u{fill:var(--ink);stroke:var(--card);stroke-width:2}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:14px;color:var(--mut);margin:8px 0}
+.sbtn{text-align:left;font:inherit;cursor:pointer}.sbtn[aria-pressed=true]{border-color:var(--teal);border-width:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="hd"><a class="brand" href="#home">SURAKSHA<b>360</b></a>
+<select id="lang" aria-label="Language"><option value="en">English</option><option value="hi">हिन्दी</option><option value="te">తెలుగు</option></select>
+<button id="th" type="button" aria-label="Toggle dark mode">🌓</button>
+<button id="mb" type="button" aria-expanded="false" aria-controls="nav" aria-label="Menu">☰</button>
+<nav id="nav" aria-label="Main"></nav></header>
+<div id="ab" hidden></div>
+<div class="bc" id="bc"></div>
+<main id="app" tabindex="-1"></main>
+<div id="toasts" class="toasts"></div>
+<footer><div><p><b>This is an educational preparedness platform, not a replacement for official emergency services or government instructions.</b> During actual emergencies, follow local authorities and official warnings.</p>
+<p id="fd"></p>
+<p>Sources: <a href="https://ndma.gov.in/" target="_blank" rel="noopener">NDMA</a> · <a href="https://mausam.imd.gov.in/" target="_blank" rel="noopener">IMD</a> · <a href="https://112.gov.in/" target="_blank" rel="noopener">112 India</a> · Safety content last reviewed: 18 Nov 2026 (student draft, verify against NDMA before exhibition).</p></div></footer>
+<script>
+(function(){
+var $=function(s){return document.querySelector(s)},root=document.documentElement,app=$("#app");
+var st={get:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+var lang=st.get("s360lang","en"),K=["home","guides","checklist","contacts","zones","alerts","quiz","learn","family","about"];
+var T={
+en:{nav:["Home","Disaster Guides","Checklist","Emergency Contacts","Shelter Map","Alerts","Quiz","Learn","Family Plan","About Us"],hero:"Disaster-Ready Smart City",tag:"Be Prepared. Stay Safe. Save Lives.",intro:"Disasters can happen anytime, but preparedness can make a difference. Suraksha360 helps individuals and communities understand risks, learn safety measures and prepare for emergencies.",ex:"Explore Safety Guides",em:"Emergency Help",rt:"Quick safety rules",dn:["Floods","Cyclones","Earthquakes","Fire"],rules:["Move to higher ground. Never walk or drive through floodwater.","Stay indoors away from windows and follow official shelter instructions.","Drop, Cover and Hold On. Do not use lifts.","Get out, stay out. Stay low under smoke and call emergency services."]},
+hi:{nav:["होम","आपदा गाइड","चेकलिस्ट","आपातकालीन संपर्क","सुरक्षित क्षेत्र","अलर्ट","क्विज़","सीखें","पारिवारिक योजना","हमारे बारे में"],hero:"आपदा-तैयार स्मार्ट सिटी",tag:"तैयार रहें। सुरक्षित रहें। जीवन बचाएं।",intro:"आपदाएँ कभी भी आ सकती हैं, लेकिन तैयारी से फर्क पड़ सकता है। सुरक्षा360 लोगों और समुदायों को जोखिम समझने, सुरक्षा उपाय सीखने और आपात स्थितियों के लिए तैयार होने में मदद करता है।",ex:"सुरक्षा गाइड देखें",em:"आपातकालीन सहायता",rt:"त्वरित सुरक्षा नियम",dn:["बाढ़","चक्रवात","भूकंप","आग"],rules:["ऊँचे स्थान पर जाएँ। बाढ़ के पानी में पैदल या गाड़ी से न जाएँ।","खिड़कियों से दूर घर के अंदर रहें और आधिकारिक आश्रय निर्देशों का पालन करें।","झुकें, ढकें और पकड़े रहें। लिफ्ट का उपयोग न करें।","बाहर निकलें और बाहर ही रहें। धुएँ में झुककर चलें और आपातकालीन सेवाओं को कॉल करें।"]},
+te:{nav:["హోమ్","విపత్తు మార్గదర్శకాలు","చెక్‌లిస్ట్","అత్యవసర సంప్రదింపులు","సురక్షిత ప్రాంతాలు","హెచ్చరికలు","క్విజ్","నేర్చుకోండి","కుటుంబ ప్రణాళిక","మా గురించి"],hero:"విపత్తు-సన్నద్ధ స్మార్ట్ సిటీ",tag:"సిద్ధంగా ఉండండి. సురక్షితంగా ఉండండి. ప్రాణాలను కాపాడండి.",intro:"విపత్తులు ఎప్పుడైనా రావచ్చు, కానీ సన్నద్ధత మార్పు తీసుకురాగలదు. సురక్షా360 వ్యక్తులు మరియు సమాజాలు ప్రమాదాలను అర్థం చేసుకోవడానికి, భద్రతా చర్యలు నేర్చుకోవడానికి మరియు అత్యవసర పరిస్థితులకు సిద్ధం కావడానికి సహాయపడుతుంది.",ex:"భద్రతా మార్గదర్శకాలు చూడండి",em:"అత్యవసర సహాయం",rt:"త్వరిత భద్రతా నియమాలు",dn:["వరద","తుపాను","భూకంపం","అగ్నిప్రమాదం"],rules:["ఎత్తైన ప్రదేశానికి వెళ్లండి. వరద నీటిలో నడవకండి, వాహనం నడపకండి.","కిటికీలకు దూరంగా ఇంట్లోనే ఉండండి, అధికారిక ఆశ్రయ సూచనలు పాటించండి.","కిందకు వంగండి, తలను కప్పుకోండి, గట్టిగా పట్టుకోండి. లిఫ్ట్ ఉపయోగించకండి.","బయటకు వెళ్లండి, బయటే ఉండండి. పొగలో కిందకు వంగి నడవండి, అత్యవసర సేవలకు కాల్ చేయండి."]}};
+var U={
+en:{sev:{warning:"WARNING",watch:"WATCH",advisory:"ADVISORY"},demo:"DEMO ALERT, NOT REAL",near:"Nearest safe shelter",view:"View on shelter map",dis:"Dismiss",all:"All hazards",tryit:"Try a demo alert",walk:"min walk (demo scale)",now:"Do this now",rain:"Heavy rain",nb:"NEAREST"},
+hi:{sev:{warning:"चेतावनी",watch:"निगरानी",advisory:"सलाह"},demo:"डेमो अलर्ट, वास्तविक नहीं",near:"निकटतम सुरक्षित आश्रय",view:"आश्रय मानचित्र देखें",dis:"बंद करें",all:"सभी आपदाएँ",tryit:"डेमो अलर्ट आज़माएँ",walk:"मिनट पैदल (डेमो पैमाना)",now:"अभी यह करें",rain:"भारी बारिश",nb:"निकटतम"},
+te:{sev:{warning:"హెచ్చరిక",watch:"గమనిక",advisory:"సూచన"},demo:"డెమో హెచ్చరిక, నిజం కాదు",near:"సమీప సురక్షిత ఆశ్రయం",view:"ఆశ్రయ మ్యాప్ చూడండి",dis:"మూసివేయండి",all:"అన్ని విపత్తులు",tryit:"డెమో హెచ్చరిక ప్రయత్నించండి",walk:"నిమిషాల నడక (డెమో స్కేల్)",now:"ఇప్పుడు ఇలా చేయండి",rain:"భారీ వర్షం",nb:"సమీపం"}};
+var HE={flood:"🌊",cyclone:"🌀",rain:"🌧️",quake:"🏚️",fire:"🔥"};
+function hn(h){var i={flood:0,cyclone:1,quake:2,fire:3}[h];return i==null?U[lang].rain:T[lang].dn[i]}
+var WARN='<svg class="wi" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4 46 42H2Z" fill="currentColor" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><rect x="22" y="17" width="4" height="14" rx="2"/><circle cx="24" cy="36" r="2.6"/></svg>';
+
+/* ---------- guide data ---------- */
+var D=[
+{id:"flood",i:"🌊",n:"Floods",d:"Overflow of water onto normally dry land, from heavy rain, overflowing rivers, dam release or coastal storm surge.",c:"Heavy or prolonged rain|Rivers overflowing|Dam or embankment failure|Blocked drains|Storm surge on the coast",s:"Hours of heavy rain|Rising river or drain levels|Official flood warnings|Water entering low-lying areas",b:"Know if your area floods and where the nearest high ground is|Keep documents in a waterproof pouch|Prepare an emergency kit|Agree a family meeting point|Follow IMD and local warnings",du:"Move to higher ground early|Never walk, swim or drive through floodwater|Switch off power at the mains only if it is safe to reach|Stay away from fallen electric wires",a:"Return only when authorities say it is safe|Treat floodwater as contaminated; drink only boiled or safe water|Avoid damaged electrical equipment|Photograph damage for claims",k:"Drinking water|Ready-to-eat food|Torch and batteries|First-aid kit and medicines|Waterproof document pouch|Charged power bank"},
+{id:"cyclone",i:"🌀",n:"Cyclones",d:"A powerful rotating storm over warm seas, bringing strong winds, heavy rain and storm surge to the coast.",c:"Warm sea-surface water feeding a low-pressure system|Favourable wind patterns over the ocean",s:"Official IMD cyclone warnings|Rapidly strengthening winds and dark skies|Rough seas and unusually high tides",b:"Know your nearest cyclone shelter and the route to it|Secure the roof, doors and windows|Store water and food for several days|Charge phones and keep a battery radio|Fishermen should not go to sea once a warning is issued",du:"Stay indoors away from windows|Move to the shelter if told to evacuate|Do not go out in the calm eye; the wind returns|Keep listening to radio updates",a:"Wait for the official all-clear|Avoid fallen power lines and flooded roads|Check on neighbours|Use boiled or safe water",k:"Battery radio|Torch and batteries|Drinking water and dry food|Medicines|Power bank|Warm, dry clothing"},
+{id:"quake",i:"🏚️",n:"Earthquakes",d:"Sudden shaking of the ground caused by movement of rock beneath the Earth’s surface.",c:"Movement along faults and tectonic plates|Rarely, volcanic activity or human activity such as large reservoirs",s:"There is usually no reliable warning|Shaking can start suddenly, sometimes after smaller tremors",b:"Fix heavy furniture and shelves to walls|Identify safe spots such as under a sturdy table|Practise Drop, Cover and Hold On|Know how to switch off gas and power|Keep a kit near an exit",du:"DROP, COVER and HOLD ON|Outdoors, move to an open area away from buildings and wires|Do not use lifts|In a vehicle, stop away from bridges and poles",a:"Expect aftershocks|Check for injuries and gas leaks|Leave damaged buildings|Use text messages and keep phone lines free",k:"Sturdy shoes|Whistle|Torch|First-aid kit|Water and food|Power bank"},
+{id:"fire",i:"🔥",n:"Fire",d:"An uncontrolled fire that spreads quickly in homes, buildings or forests.",c:"Electrical faults and overloaded sockets|Unattended cooking|Gas leaks|Candles, heaters and incense|Careless disposal of cigarettes",s:"Smell of smoke or burning|Sparks or hot, discoloured sockets|A smoke alarm sounding|Smell of gas",b:"Know two exits from every room|Install smoke alarms where possible|Keep exits clear|Do not overload sockets|Keep matches and lighters away from children",du:"Get out, stay out|Stay low under smoke|Feel doors with the back of your hand before opening|Do not use lifts|Call 112 from a safe place outside|If clothes catch fire: stop, drop and roll",a:"Do not go back in until the fire service says it is safe|Get medical care for burns and smoke inhalation|Report the incident to the authorities",k:"First-aid kit with burn dressings|Torch|Whistle|Fire extinguisher if trained to use it|Emergency contacts"}];
+var SEC=[["Definition","d"],["Causes","c"],["Warning signs","s"],["Before","b"],["During","du"],["After","a"],["Emergency kit","k"]];
+function lis(s){return"<ul>"+s.split("|").map(function(x){return"<li>"+x+"</li>"}).join("")+"</ul>"}
+
+/* ---------- demo city data (all fictional) ---------- */
+var SH=[
+{id:"s1",no:1,n:"Sample Cyclone Shelter",type:"Cyclone shelter",cap:600,x:430,y:90,hz:["cyclone","flood"],f:"Raised floor, drinking water, first aid, backup power"},
+{id:"s2",no:2,n:"Sample School Relief Centre",type:"School building",cap:400,x:300,y:310,hz:["flood","cyclone","fire"],f:"Classrooms, toilets, drinking water, first aid"},
+{id:"s3",no:3,n:"Sample Community Hall",type:"Community hall",cap:250,x:90,y:335,hz:["flood","cyclone"],f:"Large hall, toilets, drinking water"},
+{id:"s4",no:4,n:"Sample Open Ground",type:"Earthquake safe zone",cap:"open space",x:480,y:320,hz:["quake","fire"],f:"Open area away from buildings and wires, water point"},
+{id:"s5",no:5,n:"Sample Stadium Ground",type:"Earthquake safe zone",cap:"open space",x:90,y:250,hz:["quake","fire"],f:"Open ground, first-aid post, water point"}];
+var LOCS=[["Sample Area A (flood-prone zone)",130,120],["Sample Area B (coast)",505,215],["Sample Area C (north)",310,105],["Sample Area D (city centre)",300,215],["Sample Area E (south-west)",200,275]];
+var AL=[
+{id:"a1",h:"flood",sev:"warning",t:"Heavy rain and rising river level",area:"Sample Area A (fictional)",act:"Move to higher ground now. Avoid low roads and do not cross floodwater.",cx:130,cy:100,r:95},
+{id:"a2",h:"cyclone",sev:"warning",t:"Cyclone approaching the coast",area:"Sample Coastal Area B (fictional)",act:"Go to the nearest cyclone shelter. Secure your home and charge devices.",cx:520,cy:200,r:110},
+{id:"a3",h:"rain",sev:"watch",t:"Intense rain expected for 24 hours",area:"Sample Area C (fictional)",act:"Avoid underpasses and do not cross flooded roads. Know your shelter route.",cx:310,cy:90,r:80},
+{id:"a4",h:"quake",sev:"warning",t:"Moderate tremor reported",area:"Sample Area D (fictional)",act:"Drop, Cover and Hold On. When shaking stops, go to an open safe zone and expect aftershocks.",cx:300,cy:210,r:150},
+{id:"a5",h:"fire",sev:"warning",t:"Building fire reported",area:"Sample Area E (fictional)",act:"Get out and stay out. Call 112 from a safe place and move away from smoke.",cx:200,cy:270,r:60}];
+
+/* ---------- shared state ---------- */
+var M={haz:"any",sel:null,alert:null,lay:{flood:1,shelter:1,hospital:1,police:1,route:1},u:st.get("s360loc",{x:300,y:215,i:3})};
+if(!M.u||typeof M.u.x!="number"||typeof M.u.y!="number")M.u={x:300,y:215,i:3};
+var hooks={log:null,map:null},sound=true,autoT=null,cyc=0,actx=null;
+function hk(h){return h=="rain"?"flood":h}
+function fits(s,k){return k=="any"||s.hz.indexOf(hk(k))>-1}
+function dist(s){return Math.abs(M.u.x-s.x)+Math.abs(M.u.y-s.y)}
+function mins(L){return Math.max(1,Math.round(L*4/80))}
+function near(k){var b=null;SH.forEach(function(s){if(!fits(s,k))return;var L=dist(s);if(!b||L<b.L)b={s:s,L:L}});return b}
+
+/* ---------- notifications ---------- */
+function beep(){if(!sound)return;try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();if(actx.resume)actx.resume();var o=actx.createOscillator(),g=actx.createGain(),n=actx.currentTime;o.type="square";o.connect(g);g.connect(actx.destination);o.frequency.setValueAtTime(880,n);o.frequency.setValueAtTime(660,n+.2);o.frequency.setValueAtTime(880,n+.4);g.gain.setValueAtTime(.0001,n);g.gain.exponentialRampToValueAtTime(.15,n+.03);g.gain.exponentialRampToValueAtTime(.0001,n+.65);o.start(n);o.stop(n+.7)}catch(e){}}
+function sysNote(a){try{if(window.Notification&&Notification.permission==="granted")new Notification("⚠ "+U[lang].sev[a.sev]+": "+a.t,{body:a.area+". "+a.act})}catch(e){}}
+function goMap(a){M.haz=hk(a.h);M.sel=null;if(location.hash==="#zones")route();else location.hash="#zones"}
+function toast(a,nb){
+ var u=U[lang],c=$("#toasts"),d=document.createElement("div");
+ d.className="toast sev-"+a.sev;d.setAttribute("role","alert");
+ d.innerHTML='<div class="ti">'+WARN+'</div><div class="tb"><p class="tk"><span class="sv">'+u.sev[a.sev]+'</span> '+HE[a.h]+' '+hn(a.h)+' <span class="demo">'+u.demo+'</span></p><h3>'+a.t+'</h3><p class="mut">'+a.area+'</p><p><b>'+u.now+':</b> '+a.act+'</p>'+(nb?'<p><b>'+u.near+':</b> '+nb.s.no+'. '+nb.s.n+'<br><span class="mut">≈ '+mins(nb.L)+' '+u.walk+'</span></p>':'')+'<div class="alrow"><button type="button" class="btn or sm" data-go>'+u.view+'</button><button type="button" class="btn ghost sm" data-x>'+u.dis+'</button></div></div>';
+ function rm(){if(d.parentNode)d.parentNode.removeChild(d)}
+ d.querySelector("[data-go]").onclick=function(){rm();goMap(a)};
+ d.querySelector("[data-x]").onclick=rm;
+ c.insertBefore(d,c.firstChild);while(c.children.length>3)c.removeChild(c.lastChild);
+ if(a.sev!="warning")setTimeout(rm,15000)}
+function banner(){
+ var b=$("#ab"),a=M.alert;
+ if(!a){b.hidden=true;b.innerHTML="";return}
+ var u=U[lang],nb=near(a.h);
+ b.hidden=false;b.className="ab sev-"+a.sev;
+ b.innerHTML=WARN+'<div class="bt"><b>'+u.sev[a.sev]+' · '+hn(a.h)+':</b> '+a.t+'. '+(nb?u.near+': <b>'+nb.s.no+'. '+nb.s.n+'</b>':'')+'</div><button class="btn or sm" data-go type="button">'+u.view+'</button><button class="btn ghost sm" data-x type="button" aria-label="'+u.dis+'">✕</button>';
+ b.querySelector("[data-go]").onclick=function(){goMap(a)};
+ b.querySelector("[data-x]").onclick=function(){M.alert=null;banner();if(hooks.map)hooks.map()}}
+function fire(a){
+ var nb=near(a.h);M.alert=a;
+ var L=st.get("s360log",[]);L.unshift({id:a.id,t:Date.now()});st.set("s360log",L.slice(0,15));
+ toast(a,nb);banner();beep();sysNote(a);
+ try{if(navigator.vibrate)navigator.vibrate([250,120,250,120,400])}catch(e){}
+ if(hooks.log)hooks.log();if(hooks.map)hooks.map()}
+function fireNext(){var a=AL[cyc%AL.length];cyc++;fire(a)}
+function fireRandom(){fire(AL[Math.floor(Math.random()*AL.length)])}
+
+/* ---------- pages ---------- */
+var P={};
+P.home=function(el){var t=T[lang],u=U[lang];
+el.innerHTML='<section class="hero"><p class="eyebrow">'+t.hero+'</p><h1>SURAKSHA<b>360</b></h1><p class="tag">'+t.tag+'</p><p class="lead">'+t.intro+'</p><div class="row"><a class="btn or" href="#guides">'+t.ex+'</a><a class="btn wh" href="#contacts">'+t.em+'</a><button class="btn wg" id="try" type="button">'+u.tryit+'</button></div></section>'+
+'<h2>'+t.rt+'</h2><div class="grid">'+D.map(function(d,i){return'<a class="card" href="#guides"><span class="ic">'+d.i+'</span><h3>'+t.dn[i]+'</h3><p class="mut">'+t.rules[i]+'</p></a>'}).join("")+'</div>'+
+'<h2>Platform features</h2><div class="grid">'+[["🔔","Warning alerts","Pop-up alerts with a warning sign and a link to the nearest shelter.","alerts"],["🗺️","Shelter map","Find the nearest safe shelter on a demo map.","zones"],["📋","Emergency checklist","Track your kit and save progress.","checklist"],["🧠","Awareness quiz","Test what you know.","quiz"],["👨‍👩‍👧","Family safety plan","Make a household plan.","family"],["📚","Learn and prepare","Basics for homes and communities.","learn"]].map(function(f){return'<a class="card" href="#'+f[3]+'"><span class="ic">'+f[0]+'</span><h3>'+f[1]+'</h3><p class="mut">'+f[2]+'</p></a>'}).join("")+'</div>'+
+'<h2>Awareness: five habits</h2><div class="card"><ol><li>Know your local risks.</li><li>Make a family plan and a meeting point.</li><li>Build and refresh an emergency kit.</li><li>Learn how official warnings reach you.</li><li>Practise drills at home, school and work.</li></ol></div>'+
+'<h2>Our exhibition model</h2><p class="mut">The physical model is a Disaster-Ready Smart City. Each area links to a website feature. The model has no working sensors or real alert hardware.</p><div class="card" style="overflow-x:auto"><table><tr><th>Model area</th><th>Website feature</th></tr><tr><td>Flood zone</td><td><a href="#guides">Flood guide</a>, <a href="#alerts">demo alerts</a></td></tr><tr><td>Cyclone shelter</td><td><a href="#zones">Shelter map</a>, cyclone guide</td></tr><tr><td>Earthquake safe zone</td><td><a href="#guides">Earthquake guide</a>, <a href="#zones">map</a></td></tr><tr><td>Hospital and police station</td><td><a href="#contacts">Emergency contacts</a>, <a href="#zones">map</a></td></tr><tr><td>Roads and evacuation routes</td><td><a href="#zones">Map routes</a>, <a href="#family">family plan</a></td></tr><tr><td>QR code</td><td>Opens this website</td></tr></table></div>'+
+'<div class="row"><div class="qr">QR placeholder</div><p class="mut" style="flex:1 1 240px">Replace the placeholder with a QR code of your deployed website URL, then print it on the model.</p></div>';
+$("#try").onclick=fireNext};
+P.guides=function(el){
+el.innerHTML='<h1>Disaster Guides</h1><p class="mut">Based on NDMA-style preparedness advice. <a href="https://ndma.gov.in/" target="_blank" rel="noopener">Check the official NDMA site</a> for full guidance.</p><div class="row"><input id="gs" type="search" placeholder="Search guides (e.g. smoke, shelter)" aria-label="Search guides"></div><div class="chips" id="gc"></div><div id="gl"></div><p id="ge" class="empty" hidden>No guide matches your search.</p>';
+var sel="all";
+$("#gl").innerHTML=D.map(function(d,i){return'<details class="card" data-k="'+d.id+'"'+(i?'':' open')+'><summary>'+d.i+' '+d.n+'</summary>'+SEC.map(function(s){return'<h4>'+s[0]+'</h4>'+(s[1]=="d"?'<p>'+d[s[1]]+'</p>':lis(d[s[1]]))}).join("")+'<p class="mut">Source: <a href="https://ndma.gov.in/" target="_blank" rel="noopener">NDMA</a></p></details>'}).join("");
+function ap(){var q=$("#gs").value.toLowerCase().trim(),n=0;Array.prototype.forEach.call($("#gl").children,function(c){var ok=(sel=="all"||c.dataset.k==sel)&&(!q||c.textContent.toLowerCase().indexOf(q)>-1);c.hidden=!ok;if(ok){n++;if(q)c.open=true}});$("#ge").hidden=n>0}
+[["all","All"]].concat(D.map(function(d){return[d.id,d.n]})).forEach(function(c){var b=document.createElement("button");b.type="button";b.className="chip";b.textContent=c[1];b.setAttribute("aria-pressed",c[0]=="all");b.onclick=function(){sel=c[0];Array.prototype.forEach.call($("#gc").children,function(x){x.setAttribute("aria-pressed",x===b)});ap()};$("#gc").appendChild(b)});
+$("#gs").oninput=ap};
+var CK=["Drinking water","Ready-to-eat food","First-aid kit","Torch","Batteries","Power bank","Essential medicines","Waterproof document pouch","Battery or hand-crank radio","Hygiene supplies","Whistle","Clothing","Emergency contacts list"];
+P.checklist=function(el){var s=st.get("s360chk",{});
+el.innerHTML='<h1>Emergency Checklist</h1><div class="card"><div id="pt"></div><div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="pb"><i id="pf"></i></div><div id="cl"></div><div class="row"><button class="btn ghost" id="rs" type="button">Reset</button></div></div>';
+function up(){var n=CK.filter(function(x,i){return s[i]}).length,p=Math.round(n/CK.length*100);$("#pt").textContent=n+" of "+CK.length+" items ready ("+p+"%)";$("#pf").style.width=p+"%";$("#pb").setAttribute("aria-valuenow",p);st.set("s360chk",s)}
+CK.forEach(function(x,i){var l=document.createElement("label"),c=document.createElement("input");l.className="ck";c.type="checkbox";c.checked=!!s[i];c.onchange=function(){s[i]=c.checked;up()};l.appendChild(c);l.appendChild(document.createTextNode(x));$("#cl").appendChild(l)});
+$("#rs").onclick=function(){s={};Array.prototype.forEach.call(el.querySelectorAll(".ck input"),function(c){c.checked=false});up()};up()};
+P.contacts=function(el){
+el.innerHTML='<h1>Emergency Contacts (India)</h1><div class="card"><h3>National Emergency Response Number</h3><p class="big" id="n112">112</p><p>Call 112 for police, fire or medical emergencies from anywhere in India.</p><div class="row"><a class="btn or" href="tel:112">Call 112</a><button class="btn ghost" id="cp" type="button">Copy number</button><span id="cm" class="mut" role="status"></span></div></div><div class="note">Only 112 is listed as a number here. State and local numbers change, so check them on the official links below before adding them.</div><h2>When you call</h2><ol><li>Stay calm and speak clearly.</li><li>Give your exact location and landmarks.</li><li>Say what has happened and how many people need help.</li><li>Do not hang up until told to.</li></ol><h2>Official resources</h2><div class="grid"><a class="card" target="_blank" rel="noopener" href="https://112.gov.in/"><h3>112 India</h3><p class="mut">National emergency response system</p></a><a class="card" target="_blank" rel="noopener" href="https://ndma.gov.in/"><h3>NDMA</h3><p class="mut">National Disaster Management Authority</p></a><a class="card" target="_blank" rel="noopener" href="https://mausam.imd.gov.in/"><h3>IMD</h3><p class="mut">Weather, cyclone and flood warnings</p></a></div>';
+$("#cp").onclick=function(){var m=$("#cm");try{navigator.clipboard.writeText("112").then(function(){m.textContent="Copied."},function(){m.textContent="Select the number and copy it."})}catch(e){m.textContent="Select the number and copy it."}}};
+
+/* map page */
+P.zones=function(el){
+ var t=T[lang],u=U[lang];
+ var LAY=[["flood","Flood zone"],["shelter","Shelters"],["hospital","Hospital"],["police","Police station"],["route","Evacuation routes"]];
+ el.innerHTML='<h1>Shelter Map</h1><p><span class="demo">DEMO MAP</span> A schematic of the exhibition model. Shelters, routes and hazard zones are samples, not real places. Tap the map to set where you are. The nearest suitable shelter is highlighted with a route.</p>'+
+ '<div class="row"><label for="loc" style="margin:0">Your location (demo)</label><select id="loc">'+LOCS.map(function(l,i){return'<option value="'+i+'">'+l[0]+'</option>'}).join("")+'<option value="c">Custom point (tapped on map)</option></select></div>'+
+ '<p class="mut" style="margin:8px 0 2px">Show shelters for</p><div class="chips" id="hc"></div><p class="mut" style="margin:8px 0 2px">Map layers</p><div class="chips" id="lc"></div>'+
+ '<div id="mp"></div><div class="legend"><span>① – ⑤ Shelters</span><span>🟦 Flood-prone zone</span><span>🟧 Dashed: evacuation routes</span><span>🟦 Solid line: route to selected shelter</span></div><div id="mi"></div>';
+ var HZ=["any","flood","cyclone","quake","fire"],HL=[u.all].concat(t.dn);
+ function chips(){
+  $("#hc").innerHTML="";HZ.forEach(function(k,i){var b=document.createElement("button");b.type="button";b.className="chip";b.textContent=HL[i];b.setAttribute("aria-pressed",M.haz==k);b.onclick=function(){M.haz=k;M.sel=null;chips();draw()};$("#hc").appendChild(b)});
+  $("#lc").innerHTML="";LAY.forEach(function(l){var b=document.createElement("button");b.type="button";b.className="chip";b.textContent=l[1];b.setAttribute("aria-pressed",!!M.lay[l[0]]);b.onclick=function(){M.lay[l[0]]=M.lay[l[0]]?0:1;chips();draw()};$("#lc").appendChild(b)})}
+ function draw(){
+  var k=M.haz,nb=near(k),ok=SH.filter(function(s){return fits(s,k)});
+  if(!M.sel||!ok.some(function(s){return s.id==M.sel}))M.sel=nb?nb.s.id:null;
+  var sel=null;SH.forEach(function(s){if(s.id==M.sel)sel=s});
+  var h='<svg id="mapsvg" viewBox="0 0 600 400" role="img" aria-label="Demo map of the model city with numbered safe shelters, a flood-prone zone, a hospital and a police station"><rect class="m-land" width="600" height="400"/><rect class="m-sea" x="565" y="0" width="35" height="400"/><text class="m-lab" transform="translate(589 200) rotate(90)" text-anchor="middle">Sea</text><g class="m-road"><path d="M0 200H565M300 0V400M130 0V200M430 0V200M0 320H300"/></g>';
+  if(M.lay.flood)h+='<rect class="m-flood" x="20" y="20" width="220" height="155" rx="10"/><text class="m-lab" x="34" y="48">Flood-prone zone</text>';
+  if(M.lay.route)h+='<path class="m-evac" d="M130 175V200H300V310M300 200H430V108"/>';
+  if(M.alert)h+='<circle class="m-pulse" cx="'+M.alert.cx+'" cy="'+M.alert.cy+'" r="'+M.alert.r+'"/>';
+  if(M.lay.hospital)h+='<g><rect class="m-hos" x="347" y="132" width="26" height="26" rx="4"/><path d="M360 137v16M352 145h16" stroke="#d63a3a" stroke-width="5"/></g>';
+  if(M.lay.police)h+='<g><circle class="m-pol" cx="400" cy="250" r="13"/><text class="m-pt" x="400" y="250">P</text></g>';
+  if(sel&&M.lay.shelter)h+='<path class="m-route" d="M'+M.u.x+' '+M.u.y+'H'+sel.x+'V'+sel.y+'"/>';
+  if(M.lay.shelter)SH.forEach(function(s){var on=s.id==M.sel,f=fits(s,k);
+   h+='<g class="m-sh'+(f?'':' dim')+'"'+(f?' data-sid="'+s.id+'" tabindex="0" role="button" aria-label="Shelter '+s.no+': '+s.n+(on?', selected':'')+'" aria-pressed="'+on+'"':' aria-hidden="true"')+'>'+(on?'<circle class="ring" cx="'+s.x+'" cy="'+s.y+'" r="25"/>':'')+'<circle class="b" cx="'+s.x+'" cy="'+s.y+'" r="16"/><text x="'+s.x+'" y="'+s.y+'">'+s.no+'</text></g>'});
+  h+='<g><circle class="m-ur" cx="'+M.u.x+'" cy="'+M.u.y+'" r="15"/><circle class="m-u" cx="'+M.u.x+'" cy="'+M.u.y+'" r="6"/><text class="m-lab" x="'+M.u.x+'" y="'+(M.u.y-21)+'" text-anchor="middle">You</text></g></svg>';
+  $("#mp").innerHTML=h;
+  var i='';
+  if(M.alert)i+='<div class="note sev-'+M.alert.sev+'" style="border-left-color:var(--sevc)"><span class="sv">'+u.sev[M.alert.sev]+'</span> <span class="demo">'+u.demo+'</span> <b>'+hn(M.alert.h)+':</b> '+M.alert.t+'. The red dashed circle on the map marks the affected area.</div>';
+  i+=sel?'<div class="card"><h3>'+sel.no+'. '+sel.n+' <span class="demo">DEMO</span></h3><p class="mut">'+sel.type+' · Capacity: '+sel.cap+' (sample figure)</p><p><b>Suitable for:</b> '+sel.hz.map(function(x){return hn(x)}).join(", ")+'</p><p><b>Facilities:</b> '+sel.f+'</p><p><b>From your demo location:</b> about '+mins(dist(sel))+' '+u.walk+'. The route on the map is a schematic guide, not a real road path.</p></div>':'<p class="empty">No shelter matches this hazard.</p>';
+  i+='<h2>'+(k=="any"?"All shelters":"Shelters for "+hn(k))+'</h2><div class="grid">'+ok.map(function(s){return'<button type="button" class="card sbtn" data-sid="'+s.id+'" aria-pressed="'+(s.id==M.sel)+'"><b>'+s.no+'. '+s.n+'</b>'+(nb&&nb.s.id==s.id?' <span class="demo">'+u.nb+'</span>':'')+'<br><span class="mut">≈ '+mins(dist(s))+' '+u.walk+'</span></button>'}).join("")+'</div>';
+  $("#mi").innerHTML=i;$("#loc").value=String(M.u.i)}
+ el.onclick=function(e){
+  var sb=e.target.closest&&e.target.closest("[data-sid]");
+  if(sb){M.sel=sb.dataset.sid;draw();return}
+  if(e.target.closest&&e.target.closest("#mapsvg")){
+   var r=$("#mapsvg").getBoundingClientRect(),x=(e.clientX-r.left)/r.width*600,y=(e.clientY-r.top)/r.height*400;
+   M.u={x:Math.round(Math.min(555,Math.max(10,x))),y:Math.round(Math.min(390,Math.max(10,y))),i:"c"};st.set("s360loc",M.u);M.sel=null;draw()}};
+ el.onkeydown=function(e){if(e.key!="Enter"&&e.key!=" ")return;var g=e.target.closest&&e.target.closest("g[data-sid]");if(g){e.preventDefault();M.sel=g.dataset.sid;draw();var n=el.querySelector('g[data-sid="'+M.sel+'"]');if(n)n.focus()}};
+ $("#loc").onchange=function(){var v=this.value;if(v!="c"){var l=LOCS[+v];M.u={x:l[1],y:l[2],i:+v}}else M.u={x:M.u.x,y:M.u.y,i:"c"};st.set("s360loc",M.u);M.sel=null;draw()};
+ hooks.map=draw;chips();draw()};
+
+/* alerts page */
+P.alerts=function(el){
+ var u=U[lang],hs=[];AL.forEach(function(a){if(hs.indexOf(a.h)<0)hs.push(a.h)});
+ el.innerHTML='<h1>Alerts and Notifications</h1><div class="note"><span class="demo">DEMO, NOT A REAL ALERT</span> Press a button to send a simulated alert. It pops up as a notification with a warning sign, plays a sound and vibrates where the device allows it, and points to the nearest safe shelter.</div>'+
+ '<div class="row"><button class="btn or" id="rnd" type="button">Send a random demo alert</button><label class="sw"><input type="checkbox" id="auto"> Auto-send every 25 s</label><label class="sw"><input type="checkbox" id="snd"> Sound</label></div>'+
+ '<div class="row"><button class="btn ghost" id="dn" type="button" hidden>Turn on device notifications</button><span id="dm" class="mut" role="status"></span></div>'+
+ '<div class="row"><label for="af" class="mut" style="margin:0">Show</label><select id="af"><option value="all">'+u.all+'</option>'+hs.map(function(h){return'<option value="'+h+'">'+hn(h)+'</option>'}).join("")+'</select></div><div id="al" class="grid"></div>'+
+ '<h2>Notification history</h2><div class="card" id="lg"></div>'+
+ '<h2>Verified official alerts</h2><div class="card"><p class="empty">No live feed is connected. This prototype does not show real-time data.</p><p>Check live warnings at <a href="https://mausam.imd.gov.in/" target="_blank" rel="noopener">IMD</a> and <a href="https://ndma.gov.in/" target="_blank" rel="noopener">NDMA</a>.</p><p class="mut">Future work: connect official IMD and NDMA alert feeds after confirming their terms and formats.</p></div>';
+ function ap(){var f=$("#af").value;$("#al").innerHTML=AL.filter(function(a){return f=="all"||a.h==f}).map(function(a){return'<div class="card sev-'+a.sev+'" style="border-left:8px solid var(--sevc)"><p style="margin:0 0 6px"><span class="sv">'+u.sev[a.sev]+'</span> <span class="demo">'+u.demo+'</span></p><h3>'+HE[a.h]+' '+hn(a.h)+': '+a.t+'</h3><p class="mut">Time: simulated · Area: '+a.area+'<br>Source: simulated for demonstration</p><p><b>What to do:</b> '+a.act+'</p><div class="alrow"><button type="button" class="btn or sm" data-send="'+a.id+'">Send as notification</button><button type="button" class="btn ghost sm" data-map="'+a.id+'">'+u.view+'</button></div></div>'}).join("")}
+ function lg(){var L=st.get("s360log",[]);if(!L.length){$("#lg").innerHTML='<p class="empty">No alerts sent yet. Press a button above.</p>';return}
+  $("#lg").innerHTML=L.map(function(r){var a=null;AL.forEach(function(x){if(x.id==r.id)a=x});if(!a)return"";return'<div class="lg sev-'+a.sev+'"><time>'+new Date(r.t).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit",second:"2-digit"})+'</time><span class="sv">'+u.sev[a.sev]+'</span><span>'+HE[a.h]+' '+a.t+'</span></div>'}).join("")+'<div class="row"><button class="btn ghost sm" id="lc2" type="button">Clear history</button></div>';
+  $("#lc2").onclick=function(){st.set("s360log",[]);lg()}}
+ el.onclick=function(e){var s=e.target.closest&&e.target.closest("[data-send]"),m=e.target.closest&&e.target.closest("[data-map]");
+  if(s){AL.forEach(function(a){if(a.id==s.dataset.send)fire(a)})}
+  if(m){AL.forEach(function(a){if(a.id==m.dataset.map)goMap(a)})}};
+ $("#af").onchange=ap;$("#rnd").onclick=fireRandom;
+ $("#snd").checked=sound;$("#snd").onchange=function(){sound=this.checked;if(sound)beep()};
+ $("#auto").checked=!!autoT;$("#auto").onchange=function(){if(this.checked){if(!autoT)autoT=setInterval(fireRandom,25000);fireRandom()}else{clearInterval(autoT);autoT=null}};
+ try{if(window.Notification&&Notification.permission==="default"){$("#dn").hidden=false;$("#dn").onclick=function(){try{Notification.requestPermission().then(function(p){$("#dm").textContent=p==="granted"?"Device notifications are on.":"Device notifications are blocked or unavailable in this view. In-app alerts still work.";if(p==="granted")$("#dn").hidden=true})}catch(e){$("#dm").textContent="Device notifications are not available here. In-app alerts still work."}}}else if(window.Notification&&Notification.permission==="granted"){$("#dm").textContent="Device notifications are on."}}catch(e){}
+ hooks.log=lg;ap();lg()};
+
+var QZ=[["Floods","What should you do if floodwater covers a road?",["Drive through quickly","Walk through if it looks shallow","Turn around and find another route","Wait in the middle of the road"],2,"Moving water can sweep away people and vehicles and may hide hazards."],
+["Floods","Which water is safest to drink after a flood?",["Tap water without checking","Boiled or officially safe water","Water from the street","Rainwater from the ground"],1,"Floodwater contaminates supplies. Use boiled or officially safe water."],
+["Cyclones","During a cyclone warning, fishermen should:",["Go out early","Stay off the sea and return to shore","Go only at night","Go if the sky looks clear"],1,"Do not go to sea once a warning is issued."],
+["Cyclones","The calm eye of a cyclone means:",["The danger is over","Winds will return, so stay sheltered","It is safe to go out","The storm has left"],1,"The strong winds return from the other side of the eye."],
+["Earthquakes","When shaking starts indoors, you should:",["Use the lift","Drop, Cover and Hold On","Run to the balcony","Stand near a window"],1,"Drop, Cover and Hold On protects you from falling objects."],
+["Earthquakes","After an earthquake, expect:",["No more shaking","Aftershocks","Only fires","Instant floods"],1,"Aftershocks are common. Stay alert."],
+["Fire","Before opening a closed door in a fire:",["Open it fully at once","Feel it with the back of your hand","Pour water on the lock","Ignore it"],1,"A hot door means fire may be on the other side."],
+["Fire","In a smoke-filled room, you should:",["Stand upright","Stay low and move to the exit","Open all windows and wait","Hide in a cupboard"],1,"Cleaner air is near the floor."],
+["Emergency kit","Important documents should be kept:",["In a waterproof pouch","Loose in a drawer","On an open shelf","Only on paper in the kitchen"],0,"A waterproof pouch protects them from water."],
+["Emergency kit","Why keep a whistle in a kit?",["To play music","To signal for help","To scare pets","It is not useful"],1,"A whistle carries further than a voice if you are trapped."]];
+P.quiz=function(el){var q,i,sc,pick;
+function menu(){el.innerHTML='<h1>Awareness Quiz</h1><p class="mut">Pick a topic. Answers are shown only after you submit each one.</p><div class="chips" id="qt"></div>';["All","Floods","Cyclones","Earthquakes","Fire","Emergency kit"].forEach(function(t){var b=document.createElement("button");b.type="button";b.className="chip";b.textContent=t;b.onclick=function(){q=QZ.filter(function(x){return t=="All"||x[0]==t});i=0;sc=0;show()};$("#qt").appendChild(b)})}
+function show(){var x=q[i];pick=-1;el.innerHTML='<h1>Quiz</h1><div class="bar"><i style="width:'+(i/q.length*100)+'%"></i></div><p class="mut">Question '+(i+1)+' of '+q.length+' · '+x[0]+'</p><div class="card"><h3>'+x[1]+'</h3><div id="qo"></div><div id="qf"></div><div class="row"><button class="btn" id="qs" type="button" disabled>Submit answer</button></div></div>';
+x[2].forEach(function(o,j){var b=document.createElement("button");b.type="button";b.className="opt";b.textContent=o;b.setAttribute("aria-pressed","false");b.onclick=function(){if(pick>-2){pick=j;Array.prototype.forEach.call($("#qo").children,function(c,n){c.setAttribute("aria-pressed",n==j)});$("#qs").disabled=false}};$("#qo").appendChild(b)});
+$("#qs").onclick=function(){var ok=pick==x[3];if(ok)sc++;var cs=$("#qo").children;cs[x[3]].classList.add("ok");if(!ok)cs[pick].classList.add("bad");pick=-2;$("#qf").innerHTML='<p class="'+(ok?"ok-msg":"err")+'">'+(ok?"Correct!":"Not quite.")+'</p><p>'+x[4]+'</p>';this.textContent=i+1<q.length?"Next question":"See results";this.onclick=function(){i++;i<q.length?show():res()}}}
+function res(){el.innerHTML='<h1>Your result</h1><div class="card"><p style="font-size:36px;font-weight:800;margin:0">'+sc+' / '+q.length+'</p><p>'+(sc/q.length>=.8?"Excellent. You are well prepared.":sc/q.length>=.5?"Good start. Review the guides and try again.":"Keep learning. Read the guides, then retake the quiz.")+'</p><div class="row"><button class="btn" id="rt" type="button">Retake</button><a class="btn ghost" href="#guides">Read guides</a><button class="btn ghost" id="mn" type="button">Change topic</button></div></div>';$("#rt").onclick=function(){i=0;sc=0;show()};$("#mn").onclick=menu}
+menu()};
+P.learn=function(el){
+el.innerHTML='<h1>Learn and Prepare</h1><div class="grid">'+[["Hazard vs disaster","A hazard is a possible danger, such as heavy rain. A disaster happens when a hazard meets people who are exposed and not prepared."],["Early warnings","Warnings give time to act. Know which official sources your area uses and what each alert level means."],["Family emergency plan","Agree on a meeting point, share contacts and practise your exit routes. <a href=\"#family\">Make your plan.</a>"],["Community preparedness","Neighbours, schools and housing societies can run drills and keep lists of people who need extra help."],["Children","Teach children their full name, family contacts and how to call 112. Practise drills as a game."],["Older people","Keep medicines, glasses and mobility aids ready. Arrange someone to check on them during alerts."]].map(function(c){return'<div class="card"><h3>'+c[0]+'</h3><p class="mut">'+c[1]+'</p></div>'}).join("")+'</div><div class="row"><a class="btn" href="#checklist">Open the checklist</a></div><h2>FAQ</h2>'+[["Is this site an official alert source?","No. It is an educational prototype. Use IMD and NDMA for official warnings."],["Is my data uploaded anywhere?","No. Checklist and family plan data stay in this browser only."],["Does it work offline?","This hosted version does not include offline support."]].map(function(f){return'<details class="card"><summary style="font-size:17px">'+f[0]+'</summary><p>'+f[1]+'</p></details>'}).join("")};
+var FF=[["names","Family member names (optional)"],["contacts","Emergency contacts (name and number)"],["meet","Meeting point (required)"],["evac","Evacuation plan"],["needs","Accessibility and medical needs"]];
+P.family=function(el){var s=st.get("s360plan",{});
+el.innerHTML='<h1>Family Safety Plan</h1><div class="note np"><b>Privacy:</b> this information is stored only in this browser. Do not enter it on a shared device.</div><div id="ff"></div><div class="row"><button class="btn" id="sv" type="button">Save plan</button><button class="btn ghost" id="cl" type="button">Clear</button></div><p id="fm" role="status"></p>';
+FF.forEach(function(f){var l=document.createElement("label"),e=document.createElement(f[0]=="meet"?"input":"textarea");l.htmlFor=e.id="p_"+f[0];l.textContent=f[1];if(e.tagName=="TEXTAREA")e.rows=3;e.value=s[f[0]]||"";$("#ff").appendChild(l);$("#ff").appendChild(e)});
+$("#sv").onclick=function(){var v={};FF.forEach(function(f){v[f[0]]=$("#p_"+f[0]).value.trim()});var m=$("#fm");if(v.meet.length<3){m.className="err";m.textContent="Please enter a meeting point (at least 3 characters).";return}st.set("s360plan",v);m.className="ok-msg";m.textContent="Plan saved in this browser."};
+$("#cl").onclick=function(){st.set("s360plan",{});FF.forEach(function(f){$("#p_"+f[0]).value=""});$("#fm").className="ok-msg";$("#fm").textContent="Plan cleared."}};
+P.about=function(el){
+el.innerHTML='<h1>About Us and Feedback</h1><div class="grid"><div class="card"><h3>Problem</h3><p class="mut">Many people do not know how to prepare for or respond to disasters.</p></div><div class="card"><h3>Solution</h3><p class="mut">A simple, multilingual website with guides, alerts, a shelter map, a checklist, a quiz and a family plan.</p></div><div class="card"><h3>Mission</h3><p class="mut">Make preparedness easy to learn and act on.</p></div><div class="card"><h3>Vision</h3><p class="mut">Safer, better-prepared communities.</p></div></div><h2>Objectives</h2><ul><li>Explain flood, cyclone, earthquake and fire safety clearly.</li><li>Help families make a kit and a plan.</li><li>Point people to official sources.</li></ul><h2>Team</h2><div class="grid">'+["Ananya","Mahi Singh","Lakshya Raj","Ananda Bhowmik","Koti Sri Sathya Praveen","Rittika Koley"].map(function(n){return'<div class="card"><h3>'+n+'</h3><p class="mut">Team member</p></div>'}).join("")+'</div><p class="mut">Contact: [add your project email here]</p><h2>Feedback</h2><div class="card"><label for="fn">Name (optional)</label><input id="fn"><label for="fe">Email (optional)</label><input id="fe" type="email"><label for="fm2">Feedback or suggestion (required)</label><textarea id="fm2" rows="4"></textarea><div class="row"><button class="btn" id="fs" type="button">Send feedback</button></div><p id="fr" role="status"></p><p class="mut">Demo only: feedback is saved in this browser and is not sent anywhere.</p></div>';
+$("#fs").onclick=function(){var m=$("#fm2").value.trim(),e=$("#fe").value.trim(),r=$("#fr");if(m.length<10){r.className="err";r.textContent="Please write at least 10 characters.";return}if(e&&!/^\S+@\S+\.\S+$/.test(e)){r.className="err";r.textContent="Please enter a valid email or leave it empty.";return}var a=st.get("s360fb",[]);a.push({n:$("#fn").value,e:e,m:m});st.set("s360fb",a);r.className="ok-msg";r.textContent="Thank you! Your feedback was saved.";$("#fm2").value=""}};
+
+/* ---------- router ---------- */
+function route(){var k=location.hash.slice(1);if(K.indexOf(k)<0)k="home";var t=T[lang],n=t.nav[K.indexOf(k)];
+app.onclick=null;app.onkeydown=null;hooks.log=null;hooks.map=null;
+$("#nav").innerHTML=K.map(function(x,i){return'<a href="#'+x+'"'+(x==k?' aria-current="page"':"")+'>'+t.nav[i]+'</a>'}).join("");
+$("#nav").classList.remove("open");$("#mb").setAttribute("aria-expanded","false");
+$("#bc").innerHTML=k=="home"?"":'<a href="#home">'+t.nav[0]+'</a> › '+n;
+P[k](app);banner();document.title=n+" – SURAKSHA360";window.scrollTo(0,0)}
+$("#mb").onclick=function(){var o=$("#nav").classList.toggle("open");this.setAttribute("aria-expanded",o)};
+$("#lang").value=lang;root.lang=lang;
+$("#lang").onchange=function(){lang=this.value;st.set("s360lang",lang);root.lang=lang;route()};
+function eff(){return root.dataset.theme||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light")}
+var sv=st.get("s360theme",null);if(sv)root.dataset.theme=sv;
+$("#th").onclick=function(){var n=eff()=="dark"?"light":"dark";root.dataset.theme=n;st.set("s360theme",n)};
+$("#fd").textContent="Prototype for a college Design Thinking and Innovation project.";
+window.addEventListener("hashchange",route);route();
+})();
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+</body>
+</html>
